@@ -1,17 +1,16 @@
-import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { MailLoader } from './components/ui/MailLoader';
-import { RedirectIfAuthed, RequireAuth } from './features/auth/RequireAuth';
-import EmailDetailPage from './pages/EmailDetailPage';
+import { RequireAuth, RedirectIfAuthed } from './features/auth/RequireAuth';
 import LoginPage from './pages/LoginPage';
-import MailboxPage from './pages/MailboxPage';
 import SignupPage from './pages/SignupPage';
+import MailboxPage from './pages/MailboxPage';
+import EmailDetailPage from './pages/EmailDetailPage';
+import { ContactsPage } from './pages/ContactsPage';
 
-// The rich-text editor is the heaviest dependency; only load it when composing.
 const ComposePage = lazy(() => import('./pages/ComposePage'));
 
-/** The backend lands users on /dashboard after Google/Slack OAuth; keep its query (?slack=…). */
 function DashboardRedirect() {
   const { search } = useLocation();
   return <Navigate to={{ pathname: '/scheduled', search }} replace />;
@@ -36,6 +35,7 @@ export default function App() {
           </RedirectIfAuthed>
         }
       />
+
       <Route
         element={
           <RequireAuth>
@@ -43,10 +43,11 @@ export default function App() {
           </RequireAuth>
         }
       >
-        {/* key: switching tabs resets search + filter */}
         <Route path="/scheduled" element={<MailboxPage key="scheduled" tab="scheduled" />} />
         <Route path="/sent" element={<MailboxPage key="sent" tab="sent" />} />
+        <Route path="/contacts" element={<ContactsPage />} />
       </Route>
+
       <Route
         path="/emails/:id"
         element={
@@ -55,6 +56,7 @@ export default function App() {
           </RequireAuth>
         }
       />
+
       <Route
         path="/compose"
         element={
@@ -71,6 +73,7 @@ export default function App() {
           </RequireAuth>
         }
       />
+
       <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="*" element={<Navigate to="/scheduled" replace />} />
     </Routes>

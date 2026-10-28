@@ -1,17 +1,19 @@
-import clsx from 'clsx';
-import { Clock, Send } from 'lucide-react';
+import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { useEmailCounts } from '@/features/emails/api';
-import type { CurrentUser } from '@/types/api';
+import { Clock, Send, Users } from 'lucide-react';
+import clsx from 'clsx';
 import { Logo } from './Logo';
 import { UserMenu } from './UserMenu';
+import { useCurrentUser } from '@/features/auth/useCurrentUser';
+import { useEmailCounts } from '../../features/emails/api';
 
 const NAV = [
   { to: '/scheduled', label: 'Scheduled', icon: Clock, countKey: 'scheduled' },
   { to: '/sent', label: 'Sent', icon: Send, countKey: 'sent' },
+  { to: '/contacts', label: 'Contacts', icon: Users, countKey: null },
 ] as const;
 
-export function Sidebar({ user, className }: { user: CurrentUser; className?: string }) {
+export function Sidebar({ user, onClose, className }: { user?: CurrentUser; onClose?: () => void; className?: string }) {
   const { data: counts } = useEmailCounts();
 
   return (
@@ -19,7 +21,9 @@ export function Sidebar({ user, className }: { user: CurrentUser; className?: st
       <Link to="/scheduled" className="px-2 pb-2">
         <Logo />
       </Link>
+
       <UserMenu user={user} />
+
       <Link
         to="/compose"
         className="flex h-9 items-center justify-center rounded-full border border-brand text-[13px] font-medium text-brand transition hover:bg-brand-soft"
@@ -33,16 +37,21 @@ export function Sidebar({ user, className }: { user: CurrentUser; className?: st
           <NavLink
             key={to}
             to={to}
+            onClick={onClose}
             className={({ isActive }) =>
               clsx(
                 'mb-0.5 flex h-9 items-center gap-2.5 rounded-xl px-3 text-[13px] transition',
-                isActive ? 'bg-brand-soft font-semibold' : 'hover:bg-surface',
+                isActive ? 'bg-brand-soft font-semibold text-brand' : 'hover:bg-surface'
               )
             }
           >
             <Icon className="size-4" />
             <span className="flex-1">{label}</span>
-            <span className="text-[11px] font-normal text-muted">{counts ? counts[countKey].toLocaleString() : ''}</span>
+            {countKey && counts && (
+              <span className="text-[11px] font-normal text-muted">
+                {counts[countKey as keyof typeof counts]?.toLocaleString()}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
