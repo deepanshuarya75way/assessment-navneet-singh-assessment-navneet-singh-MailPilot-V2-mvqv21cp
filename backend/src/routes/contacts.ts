@@ -41,6 +41,7 @@ router.post('/preview', requireAuth, async (req, res) => {
   res.json({
     filename: filename || 'import.csv',
     summary: {
+      
       totalRows: rows.length,
       validCount: validRows.length,
       duplicateCount: duplicates.length,
